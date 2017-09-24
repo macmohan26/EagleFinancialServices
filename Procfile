@@ -1,1 +1,1 @@
-web: gunicorn maceaglefinancialservices.wsgi --log-file -
+web: gunicorn maceaglefinancialservices:app
