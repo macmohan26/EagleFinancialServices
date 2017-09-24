@@ -1,0 +1,24 @@
+{% extends "portfolio/base.html" %}
+{% block content %}
+{% if form.errors %}
+<div class="alert-warning">Your username and password didn't match. Please try again.</div>
+{% endif %}
+<div class="form-signin">
+    <form action="" method="post">
+        {% csrf_token %}
+        <h2 class="form-signin-heading">Please sign in</h2>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        <button class="btn btn-lg btn-primary btn-block" type="submit"> Login </button>
+        {% if next %}
+        <input type="hidden" name="next" value="{{ next }}"/>
+        {% endif %}
+    </form>
+    <div class="forgot--password">
+        <a href='{%url "password_reset" %}'>Forgotten your password?</a>
+    </div>
+</div>
+{% endblock %}
+
