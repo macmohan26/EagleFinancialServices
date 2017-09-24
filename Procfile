@@ -1,1 +1,1 @@
-web: gunicorn EagleFinancialServices.wsgi --log-file -
+web: gunicorn maceaglefinancialservices.wsgi --log-file -
