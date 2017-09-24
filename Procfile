@@ -1,1 +1,1 @@
-web: gunicorn wsgiapp:app
+web: gunicorn efsfaa.wsgi.application:app
