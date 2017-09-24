@@ -1,0 +1,1 @@
+web: gunicorn EagleFinancialServices.wsgi --log-file -
