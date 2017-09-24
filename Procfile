@@ -1,1 +1,1 @@
-web: gunicorn eaglefinancialservices:app
+web: gunicorn portfolio:app
