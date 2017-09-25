@@ -1,1 +1,1 @@
-web: gunicorn efsfaa.wsgi.application:app
+web: gunicorn efsfaa.wsgi --log-file -
