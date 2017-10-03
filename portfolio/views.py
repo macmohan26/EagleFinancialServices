@@ -5,6 +5,11 @@ from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from .forms import *
 from django.db.models import Sum
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import CustomerSerializer
+
 
 
 
@@ -113,22 +118,32 @@ def stock_delete(request, pk):
    return render(request, 'portfolio/stock_list.html', {'stocks': stocks})
 
 
-
-
-
 @login_required
-def portfolio(request,pk):
-   customer = get_object_or_404(Customer, pk=pk)
-   customers = Customer.objects.filter(created_date__lte=timezone.now())
-   investments =Investment.objects.filter(customer=pk)
-   stocks = Stock.objects.filter(customer=pk)
-   sum_acquired_value = Investment.objects.filter(customer=pk).aggregate(Sum('acquired_value'))
+def portfolio(request, pk):
+    customer = get_object_or_404(Customer, pk=pk)
+    customers = Customer.objects.filter(created_date__lte=timezone.now())
+    investments = Investment.objects.all()
+    stocks = Stock.objects.all()
+    sum_recent_value = Investment.objects.all().aggregate(sum=Sum('recent_value'))
+    sum_acquired_value = Investment.objects.all().aggregate(sum=Sum('acquired_value'))
+    total_initial_investment = 0
+    total_current_investment = 0
+    for investment in investments:
+        total_initial_investment += investment.acquired_value
+        total_current_investment += investment.recent_value
+
+    result = total_current_investment - total_initial_investment
 
 
-   return render(request, 'portfolio/portfolio.html', {'customers': customers, 'investments': investments,
-                                                      'stocks': stocks,
-                                                      'sum_acquired_value': sum_acquired_value,})
 
+    return render(request, 'portfolio/portfolio.html', {'customers': customers,
+                                                        'investments': investments,
+                                                        'stocks': stocks,
+                                                        'total_initial_investment': total_initial_investment,
+                                                        'total_current_investment': total_current_investment,
+                                                        'result': result,
+                                                        'sum_recent_value': sum_recent_value,
+                                                        'sum_acquired_value': sum_acquired_value, })
 
 
 
@@ -181,3 +196,12 @@ def investment_edit(request, pk):
        form = InvestmentForm(instance=investment)
    return render(request, 'portfolio/investment_edit.html', {'form': form})
 
+
+# List at the end of the views.py
+# Lists all customers
+class CustomerList(APIView):
+
+    def get(self,request):
+        customers_json = Customer.objects.all()
+        serializer = CustomerSerializer(customers_json, many=True)
+        return Response(serializer.data)

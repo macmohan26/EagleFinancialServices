@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
+from yahoo_finance import Share
 
 class Customer(models.Model):
     name = models.CharField(max_length=50)
@@ -55,9 +56,10 @@ class Stock(models.Model):
     customer = models.ForeignKey(Customer, related_name='stocks')
     symbol = models.CharField(max_length=10)
     name = models.CharField(max_length=50)
-    shares = models.DecimalField (max_digits=10, decimal_places=1)
+    shares = models.DecimalField(max_digits=10, decimal_places=2)
+    share_value = models.DecimalField (max_digits=10, decimal_places=2)
     purchase_price = models.DecimalField(max_digits=10, decimal_places=2)
-    purchase_date = models.DateField(default=timezone.now, blank=True, null=True)
+    purchase_date = models.DateField(default=timezone.now)
 
     def created(self):
         self.recent_date = timezone.now()
@@ -68,3 +70,21 @@ class Stock(models.Model):
 
     def initial_stock_value(self):
         return self.shares * self.purchase_price
+
+    def current_stock_price(self):
+        symbol_f = self.symbol
+        data = Share(symbol_f)
+        share_value = (data.get_open())
+        return share_value
+
+    def current_stock_value(self):
+        symbol_f = self.symbol
+        data = Share(symbol_f)
+        share_value = (data.get_open())
+
+        if share_value is None:
+            return float(self.shares)
+        else:
+            return '{0:.2f}'.format(float(share_value) * float(self.shares))
+
+
